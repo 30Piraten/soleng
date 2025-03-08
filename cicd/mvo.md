@@ -81,7 +81,7 @@ The solution centers around an event-driven CI/CD pipeline, automating the entir
 // Lambda Function (Go)
 func createLambdaFunction(stack awscdk.Stack, token awssecretsmanager.ISecret, dlq awssqs.IQueue) *awslambda.FunctionProps {
     return &awslambda.FunctionProps{
-        Runtime: awslambda.Runtime_PROVIDED_AL2,
+        Runtime: awslambda.Runtime_NODEJS_20_X_(),
         Handler: jsii.String("bootstrap"),
         MemorySize: jsii.Number(1024),
         Timeout: awscdk.Duration_Minutes(jsii.Number(6)),
