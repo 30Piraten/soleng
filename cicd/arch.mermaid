@@ -1,0 +1,42 @@
+flowchart TD
+    A[Developer] -->|Pushes code| B[GitHub]
+    B -->|Webhook trigger| C[AWS CodePipeline]
+    C -->|Initiates| D[AWS CodeBuild]
+    
+    D -->|1. Pull source code| B
+    D -->|2. Install dependencies| D1[Dependencies]
+    D -->|3. Run tests| D2[Unit/Contract/Integration Tests]
+    D -->|4. Package application| D3[AWS CDK]
+    D -->|5. Store artifacts| E[Amazon S3]
+    
+    C -->|Triggers| F[AWS CodeDeploy]
+    F -->|Retrieve artifacts| E
+    F -->|Blue/Green deployment| G[AWS Lambda Functions]
+    
+    F -.->|Managed by| H[AWS Organizations & Control Tower]
+    
+    I[Amazon API Gateway] -->|Routes requests| G
+    I -.->|Managed by| H
+    
+    G -->|Logs| J[AWS CloudWatch]
+    I -->|Logs & Metrics| J
+    D -->|Logs & Metrics| J
+    C -->|Logs & Metrics| J
+    
+    J -->|Generates| J1[Alarms]
+    J -->|Creates| J2[Dashboards]
+    J -->|Performs| J3[Log Insights Analysis]
+    
+    K[AWS X-Ray] -->|Traces requests| I
+    K -->|Traces requests| G
+    
+    J1 -->|Triggers| L[AWS SNS Notifications]
+    C -->|Pipeline events| L
+    
+    M[AWS IAM] -.->|Provides least privilege access| C
+    M -.->|Provides least privilege access| D
+    M -.->|Provides least privilege access| F
+    M -.->|Provides least privilege access| G
+    M -.->|Provides least privilege access| I
+    
+    N[AWS Secrets Manager & Parameter Store] -.->|Handles secrets & configs| G
