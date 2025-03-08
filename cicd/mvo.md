@@ -1,4 +1,4 @@
-**Title: Streamlining Fintech Innovation: CI/CD for Serverless Microservices on AWS**
+**Building a Scalable CI/CD Pipeline on AWS with AWS CDK**
 
 Introduction
 This case study outlines a comprehensive solution leveraging AWS-native services, emphasizing multi-environment deployments, robust testing, safe rollbacks, and cost optimization. This proposed event-driven CI/CD pipeline, coupled with detailed implementation guidance and best practices, aims to accelerate development cycles, enhance application stability, and ensure compliance with regulatory standards.standards.
@@ -16,7 +16,7 @@ A fintech startup is migrating from a monolithic architecture to serverless micr
 * **Deployment Speed and Cost Optimization:** Reducing build and deployment times while optimizing AWS service costs was critical.
 * **Security and Compliance:** Adhering to stringent security and regulatory requirements was non-negotiable.
 
-**4. Key Considerations**
+**4. Some Key Considerations**
 
 * **Phased Migration:** A gradual, iterative approach to migrating from the monolithic architecture to microservices.
 * **AWS Cloud-Native Services:** Leveraging AWS CodePipeline, CodeBuild, CodeDeploy, Lambda, API Gateway, and other services for seamless integration and scalability.

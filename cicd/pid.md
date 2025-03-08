@@ -18,7 +18,7 @@
 
 **2. Architecture Diagram**
 
-_(Include a detailed architecture diagram showing the flow: GitHub → CodePipeline → CodeBuild → CodeDeploy → Lambda/API Gateway, with emphasis on environment separation and monitoring.)_
+![PID arch diagram](./arc/textbased.png)
 
 **3. Pipeline Stages & Workflows**
 
