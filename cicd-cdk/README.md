@@ -154,3 +154,5 @@ deploymentGroup := awscodedeploy.NewLambdaDeploymentGroup(stack, jsii.String("De
 * **Performance Testing:** Implement load and performance testing.
 * **Continuous Improvement:** Regularly review and optimize the pipeline.
 * **Feature Flags:** Implement feature flags for controlled rollouts.
+
+See the PID [Pipeline Implementation Document](./pipeline-implementation-doc.md) for the implementation workflow. 
