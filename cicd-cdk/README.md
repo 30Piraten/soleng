@@ -1,4 +1,4 @@
-**Building a Scalable CI/CD Pipeline on AWS with AWS CDK**
+# **Building a Scalable CI/CD Pipeline on AWS with AWS CDK**
 
 Introduction
 This case study outlines a comprehensive solution leveraging AWS-native services, emphasizing multi-environment deployments, robust testing, safe rollbacks, and cost optimization. This proposed event-driven CI/CD pipeline, coupled with detailed implementation guidance and best practices, aims to accelerate development cycles, enhance application stability, and ensure compliance with regulatory standards.standards.
