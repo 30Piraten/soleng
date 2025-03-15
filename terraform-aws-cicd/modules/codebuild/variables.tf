@@ -21,3 +21,7 @@ variable "github_repo_url" {
   type = string 
   description = "GitHub repository for Codebuild"
 }
+
+variable "s3_policy_arn" {
+  type = string 
+}
