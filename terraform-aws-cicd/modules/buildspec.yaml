@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      golang: 1.x
+      python: 3.x
+  build:
+    commands:
+      - echo "Starting Terraform apply"
+      - aws s3 cp s3://terraform-state-bucket/terraform.tfstate terraform.tfstate 
+      - terraform init 
+      - terraform apply -auto-approve
+      - echo "Copying website files to S3"
+      - aws s3 sync ./website s3://your-website-bucket
+  post_build:
+    commands: 
+      - echo "Deployment completed"
+      - echo "Checking logs for debugging"
+      - aws logs describe-log-groups --log-group-name /aws/codebuild/${CODEBUILD_BUILD_ID}
+artifacts:
+  files:
+    - terraform.tfstate
