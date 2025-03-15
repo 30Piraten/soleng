@@ -1,0 +1,8 @@
+graph TD
+    A[Developer GitHub Push] --> B(CodePipeline Source Stage);
+    B --> C(CodeBuild Build Stage);
+    C --> D[S3 Bucket - Static Website];
+    E[User] --> D;
+    F[Terraform State S3 Bucket] --> C;
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style E fill:#ccf,stroke:#333,stroke-width:2px
