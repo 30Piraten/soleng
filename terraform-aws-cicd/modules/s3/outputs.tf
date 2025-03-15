@@ -13,3 +13,7 @@ output "s3_bucket_location" {
 output "s3_bucket_arn" {
   value = aws_s3_bucket.cicd_bucket.arn 
 }
+
+output "s3_policy_arn" {
+  value = aws_iam_policy.s3_access_policy.arn 
+}
