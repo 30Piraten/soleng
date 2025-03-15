@@ -1,5 +1,5 @@
 resource "aws_codepipeline" "code_pipeline" {
-  name = "codepipeline-v1"
+  name = var.codepipeline_name
   role_arn = aws_iam_role.code_pipeline_role.arn 
 
   artifact_store {
@@ -20,8 +20,8 @@ resource "aws_codepipeline" "code_pipeline" {
 
       configuration = {
         ConnectionArn = aws_codestarconnections_connection.github.arn 
-        FullRepositoryId = "30Piraten/soleng"
-        BrachName = "main"
+        FullRepositoryId = var.repo_id
+        BranchName = "main"
       }
     }
   }
@@ -37,6 +37,10 @@ resource "aws_codepipeline" "code_pipeline" {
       input_artifacts = ["source_output"]
       output_artifacts = ["build_output"]
       version = "1"
+
+      configuration = {
+        ProjectName = var.codebuild_project
+      }
     }
   }
 }
