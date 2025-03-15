@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "code_pipeline_assume_role" {
 }
 
 resource "aws_iam_role" "code_pipeline_role" {
-  name = "code-pipelinev1-role"
+  name = "code-pipeline-role"
   assume_role_policy = data.aws_iam_policy_document.code_pipeline_assume_role.json 
 }
 
@@ -30,6 +30,19 @@ data "aws_iam_policy_document" "code_pipeline_policy_doc" {
     ]
 
     resources = [ "${var.codebuild_arn}" ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [ "iam:PassRole" ]
+    resources = ["*"]
+    condition {
+      test = "StringEqualsIfExists"
+      variable = "iam:PassedToService"
+      values = [
+        "codebuild.amazonaws.com"
+      ]
+    }
   }
 }
 
