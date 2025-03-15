@@ -14,7 +14,10 @@ module "codebuild" {
 
 module "codepipeline" {
   source = "./modules/codepipeline"
+  repo_id = var.repo_id
+  codepipeline_name = var.codepipeline_name
   s3_bucket = module.s3.s3_bucket_location
   s3_bucket_arn = module.s3.s3_bucket_arn
+  codebuild_project = module.codebuild.codebuild_project
   codebuild_arn = module.codebuild.codebuild_arn
 }
