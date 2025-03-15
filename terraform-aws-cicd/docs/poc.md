@@ -30,17 +30,26 @@
 
 ```markdown
 📂 terraform-aws-ci-cd
- ┣ 📂 modules
- ┃ ┣ 📜 backend.tf (S3 state management)
- ┃ ┣ 📜 buildspec.yaml (Build config)
- ┃ ┣ 📜 codebuild.tf (Build & Deploy)
- ┃ ┣ 📜 codepipeline.tf (Pipeline setup)
- ┃ ┣ 📜 iam.tf (IAM roles & permissions)
- ┃ ┣ 📜 s3.tf (S3 bucket for hosting)
- ┃ ┗ 📜 variables.tf (Variable declaration)
- ┣ 📜 main.tf (Terraform entry point)
- ┣ 📜 README.md (Setup guide)
- ┗ 📜 outputs.tf (Outputs for validation)
+├── 📂 modules
+│   ├── 📂 codebuild
+│   │   ├── 📜 codebuild.tf
+│   │   ├── 📜 iam.tf
+│   │   ├── 📜 outputs.tf
+│   │   └── 📜 variables.tf
+│   ├── 📂 codepipeline
+│   │   ├── 📜 codepipeline.tf
+│   │   ├── 📜 iam.tf
+│   │   ├── 📜 outputs.tf
+│   │   └── 📜 variables.tf
+│   └── 📂 s3
+│       ├── 📜 outputs.tf
+│       ├── 📜 s3.tf
+│       └── 📜 variables.tf
+├── 📜 outputs.tf
+├── 📜 provider.tf
+├── 📜 main.tf
+├── 📜 variables.tf 
+└── 📜 buildspec.yaml
 ```
 
 **Key Resources:**
@@ -53,20 +62,80 @@
 
 **Code Snippets:**
 - *CodePipeline*
-```terraform
+```go
+resource "aws_codepipeline" "code_pipeline" {
+  name = var.codepipeline_name
+  role_arn = aws_iam_role.code_pipeline_role.arn 
 
+  artifact_store {
+    location = "${var.s3_bucket}/codepipeline-artifacts" 
+    type = "S3"
+  }
+
+  stage {
+    name = "Source"
+
+    action {
+      name = "Source"
+      category = "Source"
+      owner = "AWS"
+      provider = "CodeStarSourceConnection"
+      version = "1"
+      output_artifacts = ["source_output"]
+
+      configuration = {
+        ConnectionArn = aws_codestarconnections_connection.github.arn 
+        FullRepositoryId = var.repo_id
+        BrachName = "main"
+      }
+    }
+  }
+  ...
 ```
 
 - *buildspec*
 ```yaml
+version: 0.2
 
+phases:
+  install:
+    runtime-versions:
+      golang: 1.x
+      nodejs: latest
+  pre_build:
+    commands:
+      - echo "Preparing environment..."
+      - aws s3 cp s3://terraform-state-bucket/terraform.tfstate terraform.tfstate || echo "No existing state found creating a new one"
+      - echo "Initializing Terraform..."
+      - terraform init 
+  build:
+    commands:
+      - echo "Starting Terraform apply at ${date}"
+      - terraform apply -auto-approve
+      - echo "Copying website files to S3"
+      - aws s3 sync ./website s3://terraform-state-bucket/website
+  post_build:
+    commands: 
+      - echo "Deployment completed at ${date}"
+      - echo "Backing up Terraform state"
+      - aws s3 cp terraform.tfstate s3://terraform-state-bucket/terraform.tfstate
+      - echo "Build ID: ${CODEBUILD_BUILD_ID}"
+artifacts:
+  files:
+    - terraform.tfstate
+    - terraform.tfstate.backup
+  discard-paths: yes
+
+cache:
+  paths:
+    - "/root/.terraform/**/*"
 ```
 
 **Terraform State Management:**
 The Terraform state will be stored in an S3 bucket (terraform-state-bucket) for persistence and collaboration.
 
 - *backend.tf*
-```terraform
+```go
 terraform {
     backend "s3" {
         bucket          = "terraform-state-bucket"
@@ -92,8 +161,26 @@ terraform {
 - Terraform State S3 Bucket Policy: Grants codebuild access to read and write to the state file. 
 
 - *iam.tf*
-```terraform
-resource "aws_iam_role_policy" "codebuild_policy" {}
+```go
+...
+// IAM Policy for CodeBuild to interact with S3
+data "aws_iam_policy_document" "codebuild_s3_policy_doc" {
+  statement {
+    effect = "Allow"
+    actions = [ "s3:GetObject", "s3:PutObject", "s3:ListObject" ]
+    resources = [
+      "arn:aws:s3:::${var.s3_bucket_id}", # Bucket level
+      "arn:aws:s3:::${var.s3_bucket_id}/*", # Object level
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [ "secretsmanager:GetSecretValue" ]
+    resources = [ "arn:aws:secretmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:token" ]
+  }
+}
+...
 ```
 
 ## Error Handling
