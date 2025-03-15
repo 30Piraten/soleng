@@ -21,3 +21,7 @@ variable "codepipeline_name" {
 variable "codebuild_project" {
   type = string 
 }
+
+variable "s3_policy_arn" {
+  type = string 
+}
