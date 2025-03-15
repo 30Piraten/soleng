@@ -3,6 +3,10 @@ data "aws_secretsmanager_secret_version" "secrets" {
   secret_id = "token"
 }
 
+data "local_file" "buildspec" {
+  filename = "${path.module}/buildspec.yaml"
+}
+
 // CODEBUILD CONFIGURATION
 resource "aws_codebuild_project" "codebuild_project" {
   name = "cicd-development-project"
@@ -30,8 +34,8 @@ resource "aws_codebuild_project" "codebuild_project" {
 
   logs_config {
     cloudwatch_logs {
-      group_name = "/aws/codebuild/${aws_codebuild_project.codebuild_project.name}"
-      stream_name = "build-log-${aws_codebuild.project_codebuild_project.name}"
+      group_name = "aws/codebuild/cicd/dev-project"
+      stream_name = "build-log-stream"
     }
 
     s3_logs {
@@ -43,7 +47,10 @@ resource "aws_codebuild_project" "codebuild_project" {
   source {
     type = "GITHUB"
     location = var.github_repo_url
-    git_clone_depth = 1
+    git_clone_depth = 0
+    report_build_status = true 
+    insecure_ssl = false 
+    buildspec = data.local_file.buildspec.content
 
     git_submodules_config {
       fetch_submodules = true 

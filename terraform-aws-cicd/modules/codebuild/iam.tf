@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "codebuild_assume_role_policy" {
     effect = "Allow"
     principals {
       type = "Service"
-      identifiers = [codebuild.amazonaws.com]
+      identifiers = ["codebuild.amazonaws.com"]
     }
     actions = [ "sts:AssumeRole" ]
   }
@@ -23,7 +23,7 @@ resource "aws_iam_role" "codebuild_s3_role" {
 data "aws_iam_policy_document" "codebuild_s3_policy_doc" {
   statement {
     effect = "Allow"
-    actions = [ "s3:GetObject", "s3:PutObject", "s3:ListObject" ]
+    actions = [ "s3:GetObject", "s3:PutObject", "s3:ListBucket" ]
     resources = [
       "arn:aws:s3:::${var.s3_bucket_id}", # Bucket level
       "arn:aws:s3:::${var.s3_bucket_id}/*", # Object level
@@ -32,16 +32,18 @@ data "aws_iam_policy_document" "codebuild_s3_policy_doc" {
 
   statement {
     effect = "Allow"
-    actions = ["s3:HeadObject"]
-    resources = [
-      "arn:aws:s3:::${var.s3_bucket_id}/*", # Object level
-    ]
+    actions = [ "secretsmanager:GetSecretValue" ]
+    resources = [ "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:token" ]
   }
 
   statement {
     effect = "Allow"
-    actions = [ "secretsmanager:GetSecretValue" ]
-    resources = [ "arn:aws:secretmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:token" ]
+    actions = [ 
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+     ]
+     resources = ["*"]
   }
 }
 
@@ -52,6 +54,6 @@ resource "aws_iam_policy" "codebuild_s3_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "codebuild_s3_attachment" {
-  role = aws_iam_role.codebuild_s3_policy.name 
-  policy_arn = aws_iam_policy.codebuild_s3_role.arn 
+  role = aws_iam_role.codebuild_s3_role.name  
+  policy_arn = aws_iam_policy.codebuild_s3_policy.arn 
 }
