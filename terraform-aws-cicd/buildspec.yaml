@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      golang: 1.x
+      nodejs: latest
+  pre_build:
+    commands:
+      - echo "Preparing environment..."
+      - aws s3 cp s3://terraform-state-bucket/terraform.tfstate terraform.tfstate || echo "No existing state found creating a new one"
+      - echo "Initializing Terraform..."
+      - terraform init 
+  build:
+    commands:
+      - echo "Starting Terraform apply at ${date}"
+      - terraform apply -auto-approve
+      - echo "Copying website files to S3"
+      - aws s3 sync ./website s3://terraform-state-bucket/website
+  post_build:
+    commands: 
+      - echo "Deployment completed at ${date}"
+      - echo "Backing up Terraform state"
+      - aws s3 cp terraform.tfstate s3://terraform-state-bucket/terraform.tfstate
+      - echo "Build ID: ${CODEBUILD_BUILD_ID}"
+artifacts:
+  files:
+    - terraform.tfstate
+    - terraform.tfstate.backup
+  discard-paths: yes
+
+cache:
+  paths:
+    - "/root/.terraform/**/*"
